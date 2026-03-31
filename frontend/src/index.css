@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #1a1a1a;
+  --bg-card: rgba(30, 30, 30, 0.95);
+  --accent-primary: #00d9ff;
+  --accent-secondary: #b967ff;
+  --accent-success: #05ffa1;
+  --text-primary: #ffffff;
+  --text-secondary: #e0e0e0;
+  --text-muted: #a0a0a0;
+  --border-color: rgba(255, 255, 255, 0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  /* Performance optimizations */
+  will-change: scroll-position;
+  contain: layout style paint;
+}
+
+/* Optimized background - reduced complexity */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, rgba(0, 217, 255, 0.02) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Optimized scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  border-radius: 10px;
+  /* GPU acceleration */
+  will-change: transform;
+}
+
+::selection {
+  background: rgba(0, 217, 255, 0.3);
+  color: var(--text-primary);
+}
+
+/* Performance: Reduce animation complexity */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* GPU acceleration for animations */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+  will-change: opacity;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+  will-change: opacity, transform;
+}
+
+/* Optimize focus states */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 0 2px rgba(0, 217, 255, 0.2) !important;
+  transition: box-shadow 0.2s ease;
+}
+
+/* Optimize button interactions */
+button {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Performance hint for frequently updated elements */
+.performance-optimized {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Reduce layout shifts */
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
