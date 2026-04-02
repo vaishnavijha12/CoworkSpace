@@ -1,12 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { deskAPI, bookingAPI } from '../services/api';
 import { toast } from 'react-hot-toast';
+import { 
+  Monitor, 
+  MapPin, 
+  Clock, 
+  Zap, 
+  ChevronRight, 
+  Filter, 
+  Search,
+  X,
+  Check
+} from 'lucide-react';
 
 const Desks = () => {
   const [desks, setDesks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDesk, setSelectedDesk] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [filters, setFilters] = useState({ zone: '', type: '', amenities: '' });
   const [bookingData, setBookingData] = useState({
     startDate: '',
     endDate: '',
@@ -49,454 +61,231 @@ const Desks = () => {
     }
   };
 
+  const filteredDesks = desks.filter(desk => {
+    if (filters.zone && desk.location !== filters.zone) return false;
+    if (filters.type && desk.type !== filters.type) return false;
+    // Simple amenity check if applicable
+    return true;
+  });
+
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center',
-        minHeight: '60vh',
-        color: '#ffffff',
-        fontSize: '1.2rem'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: '60px',
-            height: '60px',
-            border: '4px solid rgba(0, 217, 255, 0.2)',
-            borderTop: '4px solid #00d9ff',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 1rem'
-          }} />
-          <p>Loading desks...</p>
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <div className="w-12 h-12 border-4 border-accent/20 border-t-accent rounded-full animate-spin"></div>
+        <p className="text-slate-500 font-medium">Fetching workspaces...</p>
       </div>
     );
   }
 
   return (
-    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
-      {/* Header */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.1) 0%, rgba(185, 103, 255, 0.1) 100%)',
-        backdropFilter: 'blur(20px)',
-        padding: '2rem 2.5rem',
-        borderRadius: '24px',
-        marginBottom: '2.5rem',
-        border: '1px solid rgba(0, 217, 255, 0.2)',
-        boxShadow: '0 8px 32px rgba(0, 217, 255, 0.15)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <h1 style={{ 
-          margin: '0 0 0.5rem 0',
-          fontSize: '2.5rem',
-          fontWeight: '800',
-          background: 'linear-gradient(135deg, #00d9ff 0%, #b967ff 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          letterSpacing: '-0.5px'
-        }}>
-          💻 Available Desks
-        </h1>
-        <p style={{ 
-          margin: 0,
-          color: '#e0e0e0',
-          fontSize: '1.1rem',
-          fontWeight: '500'
-        }}>
-          Choose your perfect workspace from our available desks
-        </p>
-      </div>
+    <div className="space-y-8 animate-fade-in">
+      {/* Header & Filters */}
+      <section className="space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Available Desks</h1>
+            <p className="text-slate-500 mt-1 font-medium text-lg">Find the perfect spot for your productivity today.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="badge bg-emerald-500 text-white flex items-center gap-1">
+              <Check size={12} /> {desks.filter(d => d.isAvailable).length} Available
+            </span>
+            <span className="badge bg-slate-200 text-slate-600">
+              {desks.length} Total
+            </span>
+          </div>
+        </div>
+
+        {/* Filter Bar */}
+        <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-soft flex flex-wrap items-center gap-2">
+          <div className="flex-1 min-w-[200px] relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input 
+              type="text" 
+              placeholder="Search by desk number or keywords..." 
+              className="w-full bg-transparent border-none py-3 pl-12 pr-4 text-sm font-medium focus:ring-0 outline-none"
+            />
+          </div>
+          <div className="h-8 w-px bg-slate-200 hidden md:block mx-2"></div>
+          <select 
+            className="bg-slate-50 border-none rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-accent/20 outline-none cursor-pointer"
+            onChange={(e) => setFilters({...filters, zone: e.target.value})}
+          >
+            <option value="">All Zones</option>
+            {[...new Set(desks.map(d => d.location))].map(loc => (
+              <option key={loc} value={loc}>{loc}</option>
+            ))}
+          </select>
+          <select 
+            className="bg-slate-50 border-none rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-accent/20 outline-none cursor-pointer"
+            onChange={(e) => setFilters({...filters, type: e.target.value})}
+          >
+            <option value="">All Types</option>
+            <option value="Hot Desk">Hot Desk</option>
+            <option value="Fixed Desk">Fixed Desk</option>
+            <option value="Standing Desk">Standing Desk</option>
+          </select>
+          <button className="bg-slate-900 text-white p-2.5 rounded-xl hover:bg-slate-800 transition-colors">
+            <Filter size={18} />
+          </button>
+        </div>
+      </section>
 
       {/* Desks Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-        gap: '2rem'
-      }}>
-        {desks.map((desk, index) => (
-          <div
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredDesks.map((desk) => (
+          <div 
             key={desk._id}
-            style={{
-              background: 'linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(20, 20, 20, 0.95) 100%)',
-              backdropFilter: 'blur(20px)',
-              padding: '2rem',
-              borderRadius: '20px',
-              border: desk.isAvailable 
-                ? '1px solid rgba(5, 255, 161, 0.3)' 
-                : '1px solid rgba(255, 0, 110, 0.3)',
-              boxShadow: desk.isAvailable
-                ? '0 8px 32px rgba(5, 255, 161, 0.15)'
-                : '0 8px 32px rgba(255, 0, 110, 0.15)',
-              transition: 'all 0.3s ease',
-              animation: `fadeIn 0.5s ease-out ${index * 0.1}s both`,
-              cursor: desk.isAvailable ? 'pointer' : 'default',
-              position: 'relative',
-              overflow: 'hidden'
-            }}
-            onMouseEnter={(e) => {
-              if (desk.isAvailable) {
-                e.currentTarget.style.transform = 'translateY(-8px)';
-                e.currentTarget.style.boxShadow = '0 12px 40px rgba(5, 255, 161, 0.3)';
-                e.currentTarget.style.borderColor = 'rgba(5, 255, 161, 0.5)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = desk.isAvailable
-                ? '0 8px 32px rgba(5, 255, 161, 0.15)'
-                : '0 8px 32px rgba(255, 0, 110, 0.15)';
-              e.currentTarget.style.borderColor = desk.isAvailable 
-                ? 'rgba(5, 255, 161, 0.3)' 
-                : 'rgba(255, 0, 110, 0.3)';
-            }}
+            className={`card group ${!desk.isAvailable ? 'opacity-60 grayscale-[0.5]' : ''}`}
           >
-            {/* Status Badge */}
-            <div style={{
-              position: 'absolute',
-              top: '1rem',
-              right: '1rem',
-              background: desk.isAvailable 
-                ? 'linear-gradient(135deg, #05ffa1 0%, #00d9ff 100%)'
-                : 'linear-gradient(135deg, #ff006e 0%, #ff4d8f 100%)',
-              padding: '0.4rem 1rem',
-              borderRadius: '20px',
-              fontSize: '0.75rem',
-              fontWeight: '700',
-              color: 'white',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              boxShadow: desk.isAvailable
-                ? '0 4px 12px rgba(5, 255, 161, 0.4)'
-                : '0 4px 12px rgba(255, 0, 110, 0.4)'
-            }}>
-              {desk.isAvailable ? '✓ Available' : '✗ Occupied'}
+            <div className="flex justify-between items-start mb-6">
+              <div className="flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-inner ${desk.isAvailable ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'}`}>
+                  <Monitor size={24} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-slate-900 uppercase">Desk {desk.deskNumber}</h3>
+                  <p className="text-xs font-bold text-slate-400 flex items-center gap-1 uppercase tracking-tighter">
+                    <MapPin size={12} /> {desk.location}
+                  </p>
+                </div>
+              </div>
+              <div className={`badge ${desk.isAvailable ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                {desk.isAvailable ? 'Available' : 'Occupied'}
+              </div>
             </div>
 
-            {/* Desk Number */}
-            <h3 style={{
-              margin: '0 0 1rem 0',
-              fontSize: '2rem',
-              fontWeight: '800',
-              background: 'linear-gradient(135deg, #00d9ff 0%, #b967ff 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              letterSpacing: '-0.5px'
-            }}>
-              {desk.deskNumber}
-            </h3>
-
-            {/* Details */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <p style={{ 
-                margin: '0 0 0.75rem 0',
-                color: '#e0e0e0',
-                fontSize: '0.95rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}>
-                <span style={{ fontSize: '1.2rem' }}>📍</span>
-                <strong>Location:</strong> {desk.location}
-              </p>
-              <p style={{ 
-                margin: '0 0 0.75rem 0',
-                color: '#e0e0e0',
-                fontSize: '0.95rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}>
-                <span style={{ fontSize: '1.2rem' }}>🪑</span>
-                <strong>Type:</strong> {desk.type}
-              </p>
-              <p style={{ 
-                margin: '0 0 0.75rem 0',
-                color: '#e0e0e0',
-                fontSize: '0.95rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}>
-                <span style={{ fontSize: '1.2rem' }}>💵</span>
-                <strong>Rate:</strong> ${desk.hourlyRate}/hr
-              </p>
-              {desk.description && (
-                <p style={{ 
-                  margin: '0.75rem 0 0 0',
-                  color: '#b0b0b0',
-                  fontSize: '0.9rem',
-                  lineHeight: '1.5'
-                }}>
-                  {desk.description}
-                </p>
-              )}
-            </div>
-
-            {/* Amenities */}
-            {desk.amenities && desk.amenities.length > 0 && (
-              <div style={{ marginBottom: '1.5rem' }}>
-                <p style={{ 
-                  margin: '0 0 0.75rem 0',
-                  color: '#a0a0a0',
-                  fontSize: '0.85rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '1px',
-                  fontWeight: '600'
-                }}>
-                  Amenities
-                </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  {desk.amenities.map((amenity, idx) => (
-                    <span
-                      key={idx}
-                      style={{
-                        background: 'rgba(0, 217, 255, 0.1)',
-                        color: '#00d9ff',
-                        padding: '0.35rem 0.75rem',
-                        borderRadius: '12px',
-                        fontSize: '0.8rem',
-                        fontWeight: '600',
-                        border: '1px solid rgba(0, 217, 255, 0.2)'
-                      }}
-                    >
+            <div className="space-y-4 mb-8">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-500 font-medium">Type</span>
+                <span className="text-slate-900 font-bold">{desk.type}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-500 font-medium">Rate</span>
+                <div className="text-right">
+                  <span className="text-2xl font-black text-slate-900">${desk.hourlyRate}</span>
+                  <span className="text-slate-400 font-bold text-xs ml-1">/HR</span>
+                </div>
+              </div>
+              
+              <div className="pt-2">
+                <div className="flex flex-wrap gap-2">
+                  {desk.amenities?.slice(0, 3).map((amenity, i) => (
+                    <span key={i} className="text-[10px] font-extrabold uppercase px-2 py-1 bg-slate-100 text-slate-500 rounded-md">
                       {amenity}
                     </span>
                   ))}
+                  {desk.amenities?.length > 3 && (
+                    <span className="text-[10px] font-extrabold uppercase px-2 py-1 bg-slate-100 text-slate-500 rounded-md">
+                      +{desk.amenities.length - 3}
+                    </span>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
 
-            {/* Book Button */}
-            <button
+            <button 
               disabled={!desk.isAvailable}
               onClick={() => {
                 setSelectedDesk(desk);
                 setShowBookingModal(true);
               }}
-              style={{
-                width: '100%',
-                padding: '1rem',
-                background: desk.isAvailable
-                  ? 'linear-gradient(135deg, #05ffa1 0%, #00d9ff 100%)'
-                  : 'rgba(255, 255, 255, 0.1)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '1rem',
-                fontWeight: '700',
-                cursor: desk.isAvailable ? 'pointer' : 'not-allowed',
-                transition: 'all 0.3s ease',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                boxShadow: desk.isAvailable ? '0 4px 20px rgba(5, 255, 161, 0.3)' : 'none'
-              }}
-              onMouseEnter={(e) => {
-                if (desk.isAvailable) {
-                  e.target.style.transform = 'scale(1.02)';
-                  e.target.style.boxShadow = '0 6px 24px rgba(5, 255, 161, 0.4)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (desk.isAvailable) {
-                  e.target.style.transform = 'scale(1)';
-                  e.target.style.boxShadow = '0 4px 20px rgba(5, 255, 161, 0.3)';
-                }
-              }}
+              className={`w-full font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 ${
+                desk.isAvailable 
+                ? 'bg-accent text-white hover:bg-accent-dark shadow-lg shadow-accent/20' 
+                : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+              }`}
             >
-              {desk.isAvailable ? '📅 Book Now' : '🔒 Not Available'}
+              {desk.isAvailable ? (
+                <>Book this workspace <ChevronRight size={18} /></>
+              ) : (
+                <>Currently Occupied</>
+              )}
             </button>
           </div>
         ))}
-      </div>
+      </section>
 
-      {/* Booking Modal */}
+      {/* Modal Redesign */}
       {showBookingModal && selectedDesk && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.85)',
-          backdropFilter: 'blur(10px)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000,
-          animation: 'fadeIn 0.3s ease-out'
-        }} onClick={() => setShowBookingModal(false)}>
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(30, 30, 30, 0.98) 0%, rgba(20, 20, 20, 0.98) 100%)',
-            backdropFilter: 'blur(20px)',
-            padding: '2.5rem',
-            borderRadius: '24px',
-            width: '90%',
-            maxWidth: '500px',
-            border: '1px solid rgba(0, 217, 255, 0.3)',
-            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.7)',
-            animation: 'slideIn 0.3s ease-out'
-          }} onClick={(e) => e.stopPropagation()}>
-            <h2 style={{
-              margin: '0 0 1.5rem 0',
-              fontSize: '2rem',
-              fontWeight: '800',
-              background: 'linear-gradient(135deg, #00d9ff 0%, #b967ff 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
-            }}>
-              Book Desk {selectedDesk.deskNumber}
-            </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-[2rem] w-full max-w-lg shadow-2xl overflow-hidden border border-slate-200">
+            <div className="p-8 pb-0 flex justify-between items-start">
+              <div>
+                <h2 className="text-3xl font-black text-slate-900 leading-tight">Confirm Booking</h2>
+                <p className="text-slate-500 font-medium mt-1">Desk {selectedDesk.deskNumber} • {selectedDesk.location}</p>
+              </div>
+              <button 
+                onClick={() => setShowBookingModal(false)}
+                className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+              >
+                <X size={24} className="text-slate-400" />
+              </button>
+            </div>
 
-            <form onSubmit={handleBookDesk}>
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ 
-                  display: 'block',
-                  marginBottom: '0.75rem',
-                  color: '#e0e0e0',
-                  fontWeight: '600',
-                  fontSize: '0.95rem'
-                }}>
-                  Start Date & Time
-                </label>
-                <input
-                  type="datetime-local"
-                  value={bookingData.startDate}
-                  onChange={(e) => setBookingData({...bookingData, startDate: e.target.value})}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '1rem',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '12px',
-                    color: 'white',
-                    fontSize: '1rem',
-                    transition: 'all 0.3s ease'
-                  }}
-                />
+            <form onSubmit={handleBookDesk} className="p-8 space-y-6">
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Check-in Time</label>
+                  <div className="relative group">
+                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-accent" size={18} />
+                    <input
+                      type="datetime-local"
+                      value={bookingData.startDate}
+                      onChange={(e) => setBookingData({...bookingData, startDate: e.target.value})}
+                      required
+                      className="w-full bg-slate-50 border-2 border-transparent focus:border-accent/20 focus:bg-white rounded-2xl py-4 pl-12 pr-4 outline-none font-bold text-slate-900 transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Check-out Time</label>
+                  <div className="relative group">
+                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-accent" size={18} />
+                    <input
+                      type="datetime-local"
+                      value={bookingData.endDate}
+                      onChange={(e) => setBookingData({...bookingData, endDate: e.target.value})}
+                      required
+                      className="w-full bg-slate-50 border-2 border-transparent focus:border-accent/20 focus:bg-white rounded-2xl py-4 pl-12 pr-4 outline-none font-bold text-slate-900 transition-all"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ 
-                  display: 'block',
-                  marginBottom: '0.75rem',
-                  color: '#e0e0e0',
-                  fontWeight: '600',
-                  fontSize: '0.95rem'
-                }}>
-                  End Date & Time
-                </label>
-                <input
-                  type="datetime-local"
-                  value={bookingData.endDate}
-                  onChange={(e) => setBookingData({...bookingData, endDate: e.target.value})}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '1rem',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '12px',
-                    color: 'white',
-                    fontSize: '1rem',
-                    transition: 'all 0.3s ease'
-                  }}
-                />
+              <div className="bg-indigo-50 border border-indigo-100 p-5 rounded-2xl flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-indigo-600 shadow-sm">
+                    <Zap size={20} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Rate Estimate</p>
+                    <p className="text-lg font-black text-slate-900">${selectedDesk.hourlyRate}<span className="text-sm font-bold text-slate-400">/hr</span></p>
+                  </div>
+                </div>
+                <button type="button" className="text-xs font-bold text-indigo-600 hover:underline">Pricing Details</button>
               </div>
 
-              <div style={{ 
-                background: 'rgba(0, 217, 255, 0.1)',
-                padding: '1rem',
-                borderRadius: '12px',
-                marginBottom: '1.5rem',
-                border: '1px solid rgba(0, 217, 255, 0.2)'
-              }}>
-                <p style={{ margin: 0, color: '#e0e0e0', fontSize: '0.95rem' }}>
-                  <strong>Rate:</strong> ${selectedDesk.hourlyRate}/hour
-                </p>
-              </div>
-
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <button
-                  type="submit"
-                  style={{
-                    flex: 1,
-                    padding: '1rem',
-                    background: 'linear-gradient(135deg, #05ffa1 0%, #00d9ff 100%)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '12px',
-                    fontSize: '1rem',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                    boxShadow: '0 4px 20px rgba(5, 255, 161, 0.3)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = 'scale(1.02)';
-                    e.target.style.boxShadow = '0 6px 24px rgba(5, 255, 161, 0.4)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = 'scale(1)';
-                    e.target.style.boxShadow = '0 4px 20px rgba(5, 255, 161, 0.3)';
-                  }}
-                >
-                  Confirm Booking
-                </button>
+              <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowBookingModal(false)}
-                  style={{
-                    flex: 1,
-                    padding: '1rem',
-                    background: 'rgba(255, 0, 110, 0.2)',
-                    color: 'white',
-                    border: '1px solid rgba(255, 0, 110, 0.4)',
-                    borderRadius: '12px',
-                    fontSize: '1rem',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.background = 'rgba(255, 0, 110, 0.3)';
-                    e.target.style.transform = 'scale(1.02)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.background = 'rgba(255, 0, 110, 0.2)';
-                    e.target.style.transform = 'scale(1)';
-                  }}
+                  className="flex-1 py-4 px-6 border-2 border-slate-100 font-bold text-slate-500 rounded-xl hover:bg-slate-50 transition-all"
                 >
-                  Cancel
+                  Go Back
+                </button>
+                <button
+                  type="submit"
+                  className="flex-[2] py-4 px-6 bg-accent text-white font-bold rounded-xl shadow-lg shadow-accent/20 hover:scale-[1.02] active:scale-95 transition-all text-center"
+                >
+                  Pay & Confirm
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-
-      <style>
-        {`
-          @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          @keyframes slideIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-          }
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}
-      </style>
     </div>
   );
 };

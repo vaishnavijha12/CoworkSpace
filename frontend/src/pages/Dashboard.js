@@ -1,351 +1,195 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { 
+  Calendar, 
+  Monitor, 
+  Users, 
+  CreditCard, 
+  Plus, 
+  ArrowRight,
+  Clock,
+  CheckCircle2
+} from 'lucide-react';
 
-const Dashboard = () => {
-  const user = JSON.parse(localStorage.getItem('user')) || {};
-  const navigate = useNavigate();
-
-  const StatCard = ({ title, value, subtitle, icon, gradient, delay }) => (
-    <div style={{
-      background: 'linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(20, 20, 20, 0.95) 100%)',
-      backdropFilter: 'blur(20px)',
-      padding: '2rem',
-      borderRadius: '20px',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
-      position: 'relative',
-      overflow: 'hidden',
-      transition: 'all 0.3s ease',
-      animation: `fadeIn 0.5s ease-out ${delay}s both`,
-      cursor: 'pointer'
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.transform = 'translateY(-8px)';
-      e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 217, 255, 0.3)';
-      e.currentTarget.style.borderColor = 'rgba(0, 217, 255, 0.3)';
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.transform = 'translateY(0)';
-      e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.5)';
-      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-    }}
-    >
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        width: '100px',
-        height: '100px',
-        background: gradient,
-        opacity: 0.1,
-        borderRadius: '50%',
-        filter: 'blur(40px)'
-      }} />
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
-          <h3 style={{ 
-            margin: 0,
-            color: '#a0a0a0',
-            fontSize: '0.9rem',
-            fontWeight: '600',
-            textTransform: 'uppercase',
-            letterSpacing: '1px'
-          }}>
-            {title}
-          </h3>
-          <span style={{ fontSize: '2rem' }}>{icon}</span>
-        </div>
-        <p style={{ 
-          margin: '0 0 0.5rem 0',
-          fontSize: '2.5rem',
-          fontWeight: '800',
-          background: gradient,
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          letterSpacing: '-1px'
-        }}>
-          {value}
-        </p>
-        {subtitle && (
-          <p style={{ 
-            margin: 0,
-            fontSize: '0.85rem',
-            color: '#808080',
-            fontWeight: '500'
-          }}>
-            {subtitle}
-          </p>
-        )}
+const StatCard = ({ title, value, subtitle, icon: Icon, colorClass }) => (
+  <div className="card group">
+    <div className="flex justify-between items-start mb-4">
+      <div className={`p-3 rounded-xl ${colorClass} bg-opacity-10 text-opacity-100 transition-transform group-hover:scale-110`}>
+        <Icon size={24} className={colorClass.replace('bg-', 'text-')} />
       </div>
     </div>
-  );
+    <div>
+      <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">{title}</p>
+      <h3 className="text-3xl font-bold text-slate-900 mb-1">{value}</h3>
+      <p className="text-xs font-medium text-slate-400">{subtitle}</p>
+    </div>
+  </div>
+);
 
-  const QuickActionButton = ({ onClick, gradient, icon, title, delay }) => (
-    <button 
-      onClick={onClick}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '0.75rem',
-        width: '100%',
-        padding: '1.25rem',
-        background: `linear-gradient(135deg, ${gradient})`,
-        color: 'white',
-        border: 'none',
-        borderRadius: '14px',
-        cursor: 'pointer',
-        fontSize: '1rem',
-        fontWeight: '700',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
-        position: 'relative',
-        overflow: 'hidden',
-        animation: `slideIn 0.5s ease-out ${delay}s both`,
-        letterSpacing: '0.3px'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-4px) scale(1.02)';
-        e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 217, 255, 0.4)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'translateY(0) scale(1)';
-        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.4)';
-      }}
-    >
-      <span style={{ fontSize: '1.5rem' }}>{icon}</span>
-      <span>{title}</span>
-    </button>
-  );
+const QuickAction = ({ title, icon: Icon, onClick, description }) => (
+  <button 
+    onClick={onClick}
+    className="flex items-center gap-4 p-5 bg-white border border-slate-200 rounded-2xl shadow-soft hover:shadow-lg hover:border-accent/30 transition-all text-left group"
+  >
+    <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-accent/10 group-hover:text-accent transition-colors">
+      <Icon size={24} />
+    </div>
+    <div className="flex-1">
+      <h4 className="font-bold text-slate-900 leading-tight">{title}</h4>
+      <p className="text-xs text-slate-500 mt-1">{description}</p>
+    </div>
+    <ArrowRight size={18} className="text-slate-300 group-hover:text-accent group-hover:translate-x-1 transition-all" />
+  </button>
+);
+
+const Dashboard = () => {
+  const user = JSON.parse(localStorage.getItem('user')) || { name: 'Ayush' };
+  const navigate = useNavigate();
+
+  const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const currentDate = new Date().toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+
+  const activities = [
+    { id: 1, type: 'booking', title: 'Desk A-12', detail: 'Confirmed for today', time: '2h ago', icon: Monitor, color: 'text-indigo-500' },
+    { id: 2, type: 'room', title: 'Strategy Room', detail: 'Reserved for 2:00 PM', time: '4h ago', icon: Users, color: 'text-emerald-500' },
+    { id: 3, type: 'payment', title: 'Monthly Invoice', detail: 'Payment successful', time: 'Yesterday', icon: CheckCircle2, color: 'text-amber-500' },
+  ];
 
   return (
-    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
-      {/* Welcome Header */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(0, 217, 255, 0.1) 0%, rgba(185, 103, 255, 0.1) 100%)',
-        backdropFilter: 'blur(20px)',
-        padding: '2.5rem',
-        borderRadius: '24px',
-        marginBottom: '2.5rem',
-        border: '1px solid rgba(0, 217, 255, 0.2)',
-        boxShadow: '0 8px 32px rgba(0, 217, 255, 0.15)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '100%',
-          background: 'linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.1), transparent)',
-          animation: 'shimmer 3s infinite'
-        }} />
-        <h1 style={{ 
-          margin: '0 0 0.75rem 0',
-          fontSize: '2.5rem',
-          fontWeight: '800',
-          background: 'linear-gradient(135deg, #00d9ff 0%, #b967ff 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          letterSpacing: '-0.5px'
-        }}>
-          Welcome Back, {user.name}! 👋
-        </h1>
-        <p style={{ 
-          margin: 0,
-          color: '#e0e0e0',
-          fontSize: '1.15rem',
-          fontWeight: '500',
-          lineHeight: '1.6'
-        }}>
-          Manage your workspace, book desks and meeting rooms, and stay connected with your community.
-        </p>
-      </div>
-
-      <div style={{ 
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-        gap: '2rem',
-        marginBottom: '2.5rem'
-      }}>
-        {/* Stats */}
-        <StatCard 
-          title="Active Bookings"
-          value="3"
-          subtitle="This month"
-          icon="📅"
-          gradient="linear-gradient(135deg, #00d9ff 0%, #0099ff 100%)"
-          delay={0}
-        />
-        <StatCard 
-          title="Total Desks"
-          value="50"
-          subtitle="Available now"
-          icon="💻"
-          gradient="linear-gradient(135deg, #05ffa1 0%, #00d9ff 100%)"
-          delay={0.1}
-        />
-        <StatCard 
-          title="Meeting Rooms"
-          value="12"
-          subtitle="Ready to book"
-          icon="🏢"
-          gradient="linear-gradient(135deg, #b967ff 0%, #ff006e 100%)"
-          delay={0.2}
-        />
-        <StatCard 
-          title="Pending Invoices"
-          value="1"
-          subtitle="Due soon"
-          icon="💰"
-          gradient="linear-gradient(135deg, #ffb800 0%, #ff8800 100%)"
-          delay={0.3}
-        />
-      </div>
-
-      <div style={{ 
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: '2rem'
-      }}>
-        {/* Quick Actions */}
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(20, 20, 20, 0.95) 100%)',
-          backdropFilter: 'blur(20px)',
-          padding: '2rem',
-          borderRadius: '20px',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
-          animation: 'fadeIn 0.6s ease-out 0.2s both'
-        }}>
-          <h3 style={{ 
-            margin: '0 0 1.5rem 0',
-            fontSize: '1.4rem',
-            fontWeight: '800',
-            color: '#ffffff',
-            letterSpacing: '-0.3px'
-          }}>
-            ⚡ Quick Actions
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <QuickActionButton 
-              onClick={() => navigate('/desks')}
-              gradient="rgba(0, 217, 255, 0.2) 0%, rgba(0, 153, 255, 0.2) 100%"
-              icon="💻"
-              title="Book a Desk"
-              delay={0.3}
-            />
-            <QuickActionButton 
-              onClick={() => navigate('/meeting-rooms')}
-              gradient="rgba(5, 255, 161, 0.2) 0%, rgba(0, 217, 255, 0.2) 100%"
-              icon="🏢"
-              title="Reserve Meeting Room"
-              delay={0.4}
-            />
-            <QuickActionButton 
-              onClick={() => navigate('/announcements')}
-              gradient="rgba(185, 103, 255, 0.2) 0%, rgba(255, 0, 110, 0.2) 100%"
-              icon="📢"
-              title="View Announcements"
-              delay={0.5}
-            />
+    <div className="space-y-8 animate-fade-in">
+      {/* Hero Section */}
+      <section>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-bold text-accent uppercase tracking-widest mb-2">{currentDate}</p>
+            <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+              Welcome back, <span className="text-accent">{user.name}</span>!
+            </h1>
+            <p className="text-slate-500 mt-2 font-medium text-lg">
+              You have <span className="text-slate-900 font-bold">3 active bookings</span> for this week.
+            </p>
+          </div>
+          <div className="bg-white px-6 py-3 rounded-2xl shadow-soft border border-slate-100 flex items-center gap-3">
+            <Clock className="text-accent" size={20} />
+            <span className="font-bold text-slate-900 text-lg">{currentTime}</span>
           </div>
         </div>
+      </section>
+
+      {/* Stats Grid */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard 
+          title="Active Bookings" 
+          value="3" 
+          subtitle="2 desks, 1 room" 
+          icon={Calendar} 
+          colorClass="bg-indigo-500" 
+        />
+        <StatCard 
+          title="Total Desks" 
+          value="50" 
+          subtitle="12 currently available" 
+          icon={Monitor} 
+          colorClass="bg-emerald-500" 
+        />
+        <StatCard 
+          title="Meeting Rooms" 
+          value="12" 
+          subtitle="Check availability" 
+          icon={Users} 
+          colorClass="bg-rose-500" 
+        />
+        <StatCard 
+          title="Pending Invoices" 
+          value="1" 
+          subtitle="Due in 3 days" 
+          icon={CreditCard} 
+          colorClass="bg-amber-500" 
+        />
+      </section>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Quick Actions */}
+        <section className="lg:col-span-2 space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Quick Actions</h2>
+            <button className="text-sm font-bold text-accent hover:underline flex items-center gap-1">
+              View all services <ArrowRight size={14} />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <QuickAction 
+              title="Book a Desk" 
+              icon={Monitor} 
+              onClick={() => navigate('/desks')} 
+              description="Find a perfect spot to focus"
+            />
+            <QuickAction 
+              title="Reserve Room" 
+              icon={Users} 
+              onClick={() => navigate('/meeting-rooms')} 
+              description="Space for your next big idea"
+            />
+            <QuickAction 
+              title="Post Announcement" 
+              icon={Megaphone} 
+              onClick={() => navigate('/announcements')} 
+              description="Share updates with the community"
+            />
+            <QuickAction 
+              title="Make Payment" 
+              icon={CreditCard} 
+              onClick={() => navigate('/billing')} 
+              description="Settle your outstanding invoices"
+            />
+          </div>
+        </section>
 
         {/* Recent Activity */}
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(20, 20, 20, 0.95) 100%)',
-          backdropFilter: 'blur(20px)',
-          padding: '2rem',
-          borderRadius: '20px',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
-          animation: 'fadeIn 0.6s ease-out 0.3s both'
-        }}>
-          <h3 style={{ 
-            margin: '0 0 1.5rem 0',
-            fontSize: '1.4rem',
-            fontWeight: '800',
-            color: '#ffffff',
-            letterSpacing: '-0.3px'
-          }}>
-            🔄 Recent Activity
-          </h3>
-          {[
-            { title: 'Desk booked', desc: 'Desk A-12 for today', time: '2 hours ago', icon: '💻', color: '#00d9ff' },
-            { title: 'Meeting room reserved', desc: 'Conference Room B for tomorrow', time: 'Yesterday', icon: '🏢', color: '#05ffa1' },
-            { title: 'Invoice paid', desc: 'Invoice #INV-001 paid', time: '3 days ago', icon: '💰', color: '#ffb800' }
-          ].map((activity, index) => (
-            <div key={index} style={{ 
-              marginBottom: index < 2 ? '1.25rem' : 0,
-              paddingBottom: index < 2 ? '1.25rem' : 0,
-              borderBottom: index < 2 ? '1px solid rgba(255, 255, 255, 0.05)' : 'none',
-              animation: `slideIn 0.5s ease-out ${0.4 + index * 0.1}s both`
-            }}>
-              <div style={{ display: 'flex', alignItems: 'start', gap: '1rem' }}>
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '12px',
-                  background: `linear-gradient(135deg, ${activity.color}20, ${activity.color}10)`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.25rem',
-                  flexShrink: 0
-                }}>
-                  {activity.icon}
+        <section className="space-y-6">
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Recent Activity</h2>
+          <div className="card !p-0 overflow-hidden">
+            <div className="divide-y divide-slate-100">
+              {activities.map((activity) => (
+                <div key={activity.id} className="p-5 flex items-start gap-4 hover:bg-slate-50 transition-colors">
+                  <div className={`p-2 rounded-lg bg-slate-100 ${activity.color}`}>
+                    <activity.icon size={20} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-slate-900 truncate">{activity.title}</p>
+                    <p className="text-xs text-slate-500 font-medium">{activity.detail}</p>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase whitespace-nowrap">{activity.time}</span>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <strong style={{ 
-                    display: 'block',
-                    color: '#ffffff',
-                    fontSize: '1rem',
-                    fontWeight: '700',
-                    marginBottom: '0.25rem'
-                  }}>
-                    {activity.title}
-                  </strong>
-                  <p style={{ 
-                    margin: '0 0 0.5rem 0',
-                    fontSize: '0.9rem',
-                    color: '#b0b0b0'
-                  }}>
-                    {activity.desc}
-                  </p>
-                  <span style={{ 
-                    fontSize: '0.8rem',
-                    color: '#808080',
-                    fontWeight: '500'
-                  }}>
-                    {activity.time}
-                  </span>
-                </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
+            <button className="w-full p-4 text-sm font-bold text-slate-500 hover:text-accent hover:bg-slate-50 transition-all border-t border-slate-100">
+              View All Activity
+            </button>
+          </div>
+        </section>
       </div>
-
-      <style>
-        {`
-          @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
-          }
-          @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-          }
-        `}
-      </style>
     </div>
   );
 };
 
 export default Dashboard;
+
+// Helper component for icon that I missed in my imports
+const Megaphone = (props) => (
+  <svg
+    {...props}
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="m3 11 18-5v12L3 14v-3z" />
+    <path d="M11.6 16.8 a3 3 0 1 1-5.8-1.2" />
+  </svg>
+);

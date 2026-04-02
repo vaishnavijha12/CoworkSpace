@@ -15,7 +15,7 @@ const meetingRoomSchema = new mongoose.Schema({
   capacity: {
     type: Number,
     required: [true, 'Please add room capacity'],
-    min: [2, 'Capacity must be at least 2'],
+    min: [1, 'Capacity must be at least 1'],
   },
   amenities: [{
     type: String,
