@@ -2,7 +2,7 @@
 
 ## Create First Admin User
 
-### Option 1: Using NPM Script (Recommended)
+###  Option 1: Using NPM Script (Recommended)
 ```bash
 cd backend
 npm run create-admin
