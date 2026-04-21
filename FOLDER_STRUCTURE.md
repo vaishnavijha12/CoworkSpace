@@ -1,7 +1,7 @@
 # Vaishnavi Coworking Space - Folder Structure
 
 ## Overview
-This is a full-stack MERN application for managing coworking spaces, desks, and meeting rooms.
+This is a full-stack MERN application  for managing coworking spaces, desks, and meeting rooms.
 
 ## Directory Structure
 
