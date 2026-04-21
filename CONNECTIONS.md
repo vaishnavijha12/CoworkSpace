@@ -2,7 +2,7 @@
 
 ## ✅ All Connections Verified
 
-### Authentication Flow
+###  Authentication Flow
 ```
 Frontend (Login.js) → authSlice.login() → api.js authAPI.login()
     ↓
