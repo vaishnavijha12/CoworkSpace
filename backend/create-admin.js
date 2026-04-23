@@ -11,7 +11,7 @@ const createAdmin = async () => {
     const existingAdmin = await User.findOne({ email: 'admin@coworkspace.com' });
     
     if (existingAdmin) {
-      console.log('⚠️  Admin user already exists!');
+      console.log('⚠️ Admin user already exists!');
       console.log('📧 Email:', existingAdmin.email);
       console.log('👤 Name:', existingAdmin.name);
       console.log('🔐 Role:', existingAdmin.role);
