@@ -62,7 +62,7 @@ const sampleRooms = [
     isAvailable: true,
     description: 'Large conference room with video conferencing',
     bookingRules: {
-      maxHours: 8,
+      maxHours: 9,
       advanceBookingDays: 30,
       minNoticeHours: 2,
     },
