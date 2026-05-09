@@ -5,7 +5,7 @@ const User = require('./src/models/User');
 const createAdmin = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
-    console.log('✅ Connected to MongoDB\n');
+    console.log('✅ Connected to MongoDB \n');
 
     // Check if admin already exists
     const existingAdmin = await User.findOne({ email: 'admin@coworkspace.com' });
