@@ -8,7 +8,7 @@ module.exports = {
       colors: {
         accent: {
           light: '#eef2ff',
-          DEFAULT: '#4f46e5', // Indigo-600
+          DEFAULT: '#4f46e5', 
           dark: '#3730a3',
         },
         slate: {
